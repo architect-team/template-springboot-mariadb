@@ -35,6 +35,7 @@ code, but Spring requires a separate process to watch raw source code and re-com
 following in another session to enable hot-reloading:
 
 ```sh
+$ cd ./src/
 $ ./gradlew build --continuous
 ```
 
