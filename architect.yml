@@ -1,0 +1,68 @@
+name: architect/template-springboot-mariadb
+description: |
+  An example Architect component that uses Spring Boot to serve the API and
+  Hibernate to connect to an auto-provisioned MariaDB database.
+keywords:
+  - java
+  - spring
+  - hibernate
+  - mariadb
+  - microservice
+
+parameters:
+  existing_db_host:
+    description: Address of an existing database host to be used instead of provisioning a new one.
+    required: false
+  db_root_pass: rootsecret
+  db_user: myuser
+  db_pass: somepassword
+  db_port: 3306
+  db_name: spring-example
+
+services:
+  database:
+    image: mariadb:10.7
+    interfaces:
+      mysql:
+        host: ${{ parameters.existing_db_host }}
+        port: ${{ parameters.db_port }}
+        protocol: mariadb
+        path: /${{ parameters.db_name }}
+    environment:
+      MARIADB_ROOT_PASSWORD: ${{ parameters.db_root_pass }}
+      MARIADB_USER: ${{ parameters.db_user }}
+      MARIADB_PASSWORD: ${{ parameters.db_pass }}
+      MYSQL_DATABASE: ${{ parameters.db_name }}
+
+  app:
+    build:
+      context: ./src
+    command:
+      - sh
+      - -c
+      - |
+        sleep 5
+        java -jar /app/app.jar
+    interfaces:
+      main: 8080
+    environment:
+      DB_ADDR: ${{ services.database.interfaces.mysql.url }}
+      DB_USER: ${{ parameters.db_user }}
+      DB_PASS: ${{ parameters.db_pass }}
+    ${{ if architect.environment == 'local' }}:
+      build:
+        dockerfile: Dockerfile.debug
+      command: gradle --project-cache-dir /tmp/gradle-cache bootRun
+      environment:
+        ENABLE_CACHE: false
+      volumes:
+        src:
+          host_path: ./src
+          mount_path: /home/gradle/src
+
+interfaces:
+  app:
+    url: ${{ services.app.interfaces.main.url }}
+    description: Exposes the spring application to upstream traffic
+    ingress:
+      subdomain: app
