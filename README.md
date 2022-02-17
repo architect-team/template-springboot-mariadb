@@ -31,17 +31,7 @@ $ architect dev ./architect.yml
 #### Hot reloading
 
 The project is automatically configured to hot reload when it detects changes to the compiled
-code, but Spring requires a separate process to watch raw source code and re-compile. Run the
-following in another session to enable hot-reloading:
-
-```sh
-$ cd ./src/
-$ ./gradlew build --continuous
-```
-
-Any time you make changes to the source code, you'll first see this window pickup the changes and re-compile
-before quickly seeing the original architect deploy process respond to the newly compiled code and restart the
-server.
+code, so feel free to make changes and the application will auto-update itself.
 
 ### Cloud deployment
 

@@ -52,7 +52,12 @@ services:
     ${{ if architect.environment == 'local' }}:
       build:
         dockerfile: Dockerfile.debug
-      command: gradle --project-cache-dir /tmp/gradle-cache bootRun
+      command:
+        - sh
+        - -c
+        - |
+          gradle --stop
+          gradle build --continuous --quiet & gradle --project-cache-dir /tmp/gradle-cache bootRun
       environment:
         ENABLE_CACHE: false
       volumes:
